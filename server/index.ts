@@ -9,13 +9,19 @@ app.use(cors());
 app.use(express.json());
 const PORT = 4000;
 
-const wss = new WebSocket.Server({ port: 8000});
+const wss = new WebSocket.Server({ port: 8000 });
 const clients = new Map();
 
 wss.on('connection', (ws: WebSocket) => {
   ws.on('message', async (msg: string) => {
     const {type, username, message} = JSON.parse(msg.toString());
     if (type === 'join') {
+        // if(clients.has(username)) {
+        //     console.log('Username already taken. Try a different username');
+        //     ws.send(JSON.stringify({type: 'error', message: 'Username already taken. Try a different username'}));
+        //     ws.close();
+        //     return;
+        // }
         clients.set(username, ws);
         ws.send(JSON.stringify({type: 'history', messages: await fetchMessages()}));
     } else if (type === 'message') {
