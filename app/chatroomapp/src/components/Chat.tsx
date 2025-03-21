@@ -6,8 +6,8 @@ export function Chat(){
     const [username, setUsername] = useState('');
     const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
-    const {socket, messages, error, setError} = useWebSocket('ws://localhost:8000');
-    const [typingUser, setTypingUser] = useState(null);
+    const {socket, messages, error, setError, typingUser} = useWebSocket('ws://localhost:8000');
+    // const [typingUser, setTypingUser] = useState(null);
 
     useEffect(() => {
         if(error){
@@ -28,11 +28,11 @@ export function Chat(){
         }
     }
 
-    // const handleTyping = () => {
-    //     if(socket && username){
-    //         socket.send(JSON.stringify({type: 'typing', username}));    
-    //     }
-    // }
+    const handleTyping = () => {
+        if(socket && username){
+            socket.send(JSON.stringify({type: 'typing', username}));    
+        }
+    }
 
     return (
         <Container>
@@ -58,14 +58,14 @@ export function Chat(){
                                     <Typography key={index}><strong>{msg.username}</strong>: {msg.message}</Typography>
                                 ))
                             }
-                            {/* {typingUser && <Typography><em>{typingUser} is typing...</em></Typography>} */}
+                            {typingUser && <Typography><em>{typingUser} is typing...</em></Typography>}
                         </div>
                         <TextField
                             label="Message"
                             value={message}
                             onChange={(e) => {
                                 setMessage(e.target.value)
-                                // handleTyping();
+                                handleTyping();
                             }}
                             fullWidth
                             />
