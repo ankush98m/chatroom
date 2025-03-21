@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { Container, Paper, Button, Typography, TextField } from "@mui/material";
 
@@ -7,7 +7,7 @@ export function Chat() {
     const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
     const { socket, messages, error, setError, typingUser } = useWebSocket('ws://localhost:8000');
-    // const [typingUser, setTypingUser] = useState(null);
+    const chatWindowRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (error) {
@@ -20,6 +20,12 @@ export function Chat() {
             socket.send(JSON.stringify({ type: 'join', username }));
         }
     }, [socket, isConnected, error]);
+
+    useEffect(() => {
+        if (chatWindowRef.current) {
+            chatWindowRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
 
     const sendMessage = () => {
         if (socket && message.trim() !== '') {
@@ -83,6 +89,7 @@ export function Chat() {
 
                             </div>
                             {typingUser && typingUser !== username && <Typography><em>{typingUser} is typing...</em></Typography>}
+                            <div ref={chatWindowRef}/>
                         </div>
                         <TextField
                             label="Message"
