@@ -16,20 +16,19 @@ wss.on('connection', (ws: WebSocket) => {
   ws.on('message', async (msg: string) => {
     const {type, username, message} = JSON.parse(msg.toString());
     if (type === 'join') {
-        // if(clients.has(username)) {
-        //     console.log('Username already taken. Try a different username');
-        //     ws.send(JSON.stringify({type: 'error', message: 'Username already taken. Try a different username'}));
-        //     ws.close();
-        //     return;
-        // }
+        if(clients.has(username)) {
+            console.log('Username already taken. Try a different username');
+            ws.send(JSON.stringify({type: 'error', message: 'Username already taken. Try a different username'}));
+            ws.close();
+            return;
+        }
         clients.set(username, ws);
         ws.send(JSON.stringify({type: 'history', messages: await fetchMessages()}));
     } else if (type === 'message') {
         await storeMessage(username, message);
         broadcast({type: 'message', username, message});
     } else if(type === 'typing'){
-        broadcast({type: 'typing', username
-        });
+        broadcast({type: 'typing', username});
     }
   });
 

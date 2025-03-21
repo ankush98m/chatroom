@@ -6,45 +6,20 @@ export function Chat(){
     const [username, setUsername] = useState('');
     const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
-    const {socket, messages} = useWebSocket('ws://localhost:8000');
+    const {socket, messages, error, setError} = useWebSocket('ws://localhost:8000');
     const [typingUser, setTypingUser] = useState(null);
 
     useEffect(() => {
-        console.log("socket:");
-        if(!socket) return;
-        // socket.onmessage = (event) => {
-        //     const data = JSON.parse(event.data);
-        //     console.log("Received message:", data);
-    
-        //     if (data.type === 'error') {
-        //         alert(data.message);
-        //         setIsConnected(false);
-        //         setUsername('');
-        //         return;
-        //     }
-    
-        //     if (data.type === 'history') {
-        //         console.log("Chat History:", data.messages);
-        //     }
-        // };
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if(data.type === 'typing'){
-                setTypingUser(data.username);
-                setTimeout(() => setTypingUser(null), 2000);
-            }
+        if(error){
+            alert(error);
+            setIsConnected(false);
+            setUsername('')
+            setError(null);
         }
-        if (username && isConnected) {
+        if (socket && username && isConnected) {
             socket.send(JSON.stringify({type: 'join', username}));
         }
-        
-        
-        // return () => {
-        //     if(socket){
-        //         socket.onmessage = null;
-        //     }
-        // }
-    }, [socket, isConnected]);
+    }, [socket, isConnected, error]);
 
     const sendMessage = () => {
         if(socket && message.trim() !== ''){
@@ -53,11 +28,11 @@ export function Chat(){
         }
     }
 
-    const handleTyping = () => {
-        if(socket && username){
-            socket.send(JSON.stringify({type: 'typing', username}));    
-        }
-    }
+    // const handleTyping = () => {
+    //     if(socket && username){
+    //         socket.send(JSON.stringify({type: 'typing', username}));    
+    //     }
+    // }
 
     return (
         <Container>
@@ -66,8 +41,13 @@ export function Chat(){
                     <Paper elevation={3} sx={{ p: 3, mt: 5 }}>
                         {/* <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} /> */}
                         <Typography variant="h6">Enter your username</Typography>
-                        <TextField fullWidth value={username} onChange={(e)=>setUsername(e.target.value)}/>
-                        <Button variant="contained" sx={{ mt: 2 }}  onClick={() => setIsConnected(true)}>Connect</Button>
+                        <TextField 
+                            fullWidth 
+                            value={username} 
+                            onChange={(e)=>setUsername(e.target.value)}
+                            error={!!error} 
+                            helperText={error} />
+                        <Button variant="contained" sx={{ mt: 2 }}  onClick={() => setIsConnected(true)}>Connect</Button> 
                     </Paper>  
                 ): (
                     <Paper elevation={3} sx={{ p: 3, mt: 5 }}>
@@ -78,14 +58,14 @@ export function Chat(){
                                     <Typography key={index}><strong>{msg.username}</strong>: {msg.message}</Typography>
                                 ))
                             }
-                            {typingUser && <Typography><em>{typingUser} is typing...</em></Typography>}
+                            {/* {typingUser && <Typography><em>{typingUser} is typing...</em></Typography>} */}
                         </div>
                         <TextField
                             label="Message"
                             value={message}
                             onChange={(e) => {
                                 setMessage(e.target.value)
-                                handleTyping();
+                                // handleTyping();
                             }}
                             fullWidth
                             />
