@@ -27,6 +27,9 @@ wss.on('connection', (ws: WebSocket) => {
     } else if (type === 'message') {
         await storeMessage(username, message);
         broadcast({type: 'message', username, message});
+    } else if(type === 'typing'){
+        broadcast({type: 'typing', username
+        });
     }
   });
 

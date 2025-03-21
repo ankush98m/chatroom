@@ -1,4 +1,4 @@
-import React, {useState, useEffect, use} from "react";
+import React, {useState, useEffect} from "react";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { Container, Paper, Button, Typography, TextField } from "@mui/material";
 
@@ -7,6 +7,7 @@ export function Chat(){
     const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
     const {socket, messages} = useWebSocket('ws://localhost:8000');
+    const [typingUser, setTypingUser] = useState(null);
 
     useEffect(() => {
         console.log("socket:");
@@ -26,6 +27,13 @@ export function Chat(){
         //         console.log("Chat History:", data.messages);
         //     }
         // };
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if(data.type === 'typing'){
+                setTypingUser(data.username);
+                setTimeout(() => setTypingUser(null), 2000);
+            }
+        }
         if (username && isConnected) {
             socket.send(JSON.stringify({type: 'join', username}));
         }
@@ -42,6 +50,12 @@ export function Chat(){
         if(socket && message.trim() !== ''){
             socket.send(JSON.stringify({type: 'message', username, message}));
             setMessage('');
+        }
+    }
+
+    const handleTyping = () => {
+        if(socket && username){
+            socket.send(JSON.stringify({type: 'typing', username}));    
         }
     }
 
@@ -64,11 +78,15 @@ export function Chat(){
                                     <Typography key={index}><strong>{msg.username}</strong>: {msg.message}</Typography>
                                 ))
                             }
+                            {typingUser && <Typography><em>{typingUser} is typing...</em></Typography>}
                         </div>
                         <TextField
                             label="Message"
                             value={message}
-                            onChange={(e) => setMessage(e.target.value)}
+                            onChange={(e) => {
+                                setMessage(e.target.value)
+                                handleTyping();
+                            }}
                             fullWidth
                             />
                         <Button variant="contained" sx={{ mt: 2 }} onClick={() => sendMessage()}>Send</Button>
