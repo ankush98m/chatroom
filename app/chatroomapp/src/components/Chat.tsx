@@ -6,9 +6,14 @@ export function Chat() {
     const [username, setUsername] = useState('');
     const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
+
+    // websocket hook to manage socket connection, messages, error and typing user
     const { socket, messages, error, setError, typingUser } = useWebSocket('ws://localhost:8000');
+
+    // reference to chat window to scroll to bottom
     const chatWindowRef = useRef<HTMLDivElement>(null);
 
+    // effect hook to handle socket connection and error condition
     useEffect(() => {
         if (error) {
             alert(error);
@@ -21,12 +26,14 @@ export function Chat() {
         }
     }, [socket, isConnected, error]);
 
+    // effect hook to scroll to bottom of chat window
     useEffect(() => {
         if (chatWindowRef.current) {
             chatWindowRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
 
+    // function to send message to server
     const sendMessage = () => {
         if (socket && message.trim() !== '') {
             socket.send(JSON.stringify({ type: 'message', username, message }));
@@ -34,12 +41,14 @@ export function Chat() {
         }
     }
 
+    // Function to send typing event to server
     const handleTyping = () => {
         if (socket && username) {
             socket.send(JSON.stringify({ type: 'typing', username }));
         }
     }
 
+    // Function to leave chat room
     const leaveChat = () => {
         if (socket && username) {
             socket.send(JSON.stringify({ type: 'leave', username }));
@@ -53,7 +62,6 @@ export function Chat() {
             {
                 !isConnected ? (
                     <Paper elevation={3} sx={{ p: 3, mt: 5 }}>
-                        {/* <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} /> */}
                         <Typography variant="h6">Enter your username</Typography>
                         <TextField
                             fullWidth
