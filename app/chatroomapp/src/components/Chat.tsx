@@ -40,6 +40,14 @@ export function Chat() {
         }
     }
 
+    const leaveChat = () => {
+        if (socket && username) {
+            socket.send(JSON.stringify({ type: 'leave', username }));
+            setIsConnected(false);
+            setUsername('');
+        }
+    }
+
     return (
         <Container>
             {
@@ -91,6 +99,11 @@ export function Chat() {
                             {typingUser && typingUser !== username && <Typography><em>{typingUser} is typing...</em></Typography>}
                             <div ref={chatWindowRef}/>
                         </div>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                        }}>
                         <TextField
                             label="Message"
                             value={message}
@@ -100,7 +113,9 @@ export function Chat() {
                             }}
                             fullWidth
                         />
-                        <Button variant="contained" sx={{ mt: 2 }} onClick={() => sendMessage()}>Send</Button>
+                        <Button variant="contained" sx={{padding: '10px 30px'}} onClick={() => sendMessage()}>Send</Button>
+                        </div>
+                        <Button variant="contained" color="error" sx={{ mt: 2 }} onClick={() => leaveChat()}>Leave Chat</Button>
                     </Paper>
                 )
             }

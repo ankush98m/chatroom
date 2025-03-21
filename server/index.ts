@@ -29,6 +29,9 @@ wss.on('connection', (ws: WebSocket) => {
         broadcast({type: 'message', username, message});
     } else if(type === 'typing'){
         broadcast({type: 'typing', username});
+    } else if(type === 'leave'){
+        clients.delete(username);
+        broadcast({type: 'leave', username});
     }
   });
 
